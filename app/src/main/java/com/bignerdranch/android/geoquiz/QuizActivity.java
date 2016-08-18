@@ -59,6 +59,30 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onDestroy() called");
     }
 
+    private void updateQuestion()
+    {
+        int question = mQuestionBank[mCurrentIndex].getTextResId();
+        mQuestionTextView.setText(question);
+    }
+
+    private void checkAnswer(boolean userPressedTrue)
+    {
+        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+
+        int messageResId = 0;
+
+        if (userPressedTrue == answerIsTrue)
+        {
+            messageResId = R.string.correct_toast;
+        }
+        else
+        {
+            messageResId = R.string.incorrect_toast;
+        }
+
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,12 +96,14 @@ public class QuizActivity extends AppCompatActivity {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
 
+
+
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v){
-                Toast.makeText(QuizActivity.this,R.string.incorrect_toast,Toast.LENGTH_SHORT).show();
+                checkAnswer(true);
             }
 
         });
@@ -87,7 +113,7 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                Toast.makeText(QuizActivity.this, R.string.correct_toast, Toast.LENGTH_SHORT).show();
+                checkAnswer(false);
             }
         });
 

@@ -12,13 +12,17 @@ public class QuizActivity extends AppCompatActivity {
 
     //This is used for logging purposes
     private static final String TAG = "QuizActivity";
+    //Used to store the current question on rotate
+    private static final String KEY_INDEX = "index";
 
+    //Variables
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
     private Button mPreviousButton;
     private TextView mQuestionTextView;
 
+    //Array of questions
     private Question[] mQuestionBank = new Question[]
             {
                     new Question(R.string.question_oceans, true),
@@ -59,12 +63,14 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onDestroy() called");
     }
 
+    //Method used to update the question being viewed
     private void updateQuestion()
     {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
     }
 
+    //Method used for checking true or false answer
     private void checkAnswer(boolean userPressedTrue)
     {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
@@ -84,7 +90,8 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         //Part of logging created above
@@ -95,8 +102,6 @@ public class QuizActivity extends AppCompatActivity {
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
-
-
 
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener()
@@ -123,9 +128,14 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                int question = mQuestionBank[mCurrentIndex].getTextResId();
-                mQuestionTextView.setText(question);
+                //added if statement to prevent flipping back to question 1
+                //after last question has been reached
+                if(mCurrentIndex < (mQuestionBank.length - 1))
+                {
+                    mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                    updateQuestion();
+                }
+
             }
         });
 
@@ -135,10 +145,28 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
-                int question = mQuestionBank[mCurrentIndex].getTextResId();
-                mQuestionTextView.setText(question);
+                //added if statement to stop app failing when clicking previous button
+                //While on question #1
+                if(mCurrentIndex >= 1) {
+                    mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
+                    updateQuestion();
+                }
             }
         });
-    }
+
+        if(savedInstanceState != null)
+        {
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+        }
+
+        updateQuestion();
+
+        }
+        @Override
+        public void onSaveInstanceState(Bundle savedInstanceState)
+        {
+            super.onSaveInstanceState(savedInstanceState);
+            Log.i(TAG, "onSaveInstanceState");
+            savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        }
 }
